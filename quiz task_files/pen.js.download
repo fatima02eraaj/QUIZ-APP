@@ -1,0 +1,138 @@
+const questions = [
+{
+  question: "What does HTML stand for?",
+  options: ["HyperText Machine Language", "HyperText Markup Language", "HighText Markdown Language", "None of these"],
+  answer: "HyperText Markup Language" },
+
+{
+  question: "Which language is used for styling web pages?",
+  options: ["HTML", "JQuery", "CSS", "XML"],
+  answer: "CSS" },
+
+{
+  question: "Which of these is a Python data type?",
+  options: ["Integer", "Float", "List", "All of the above"],
+  answer: "All of the above" },
+
+{
+  question: "Which keyword is used to define a function in Python?",
+  options: ["function", "def", "define", "lambda"],
+  answer: "def" },
+
+{
+  question: "What does DOM stand for?",
+  options: ["Document Object Model", "Data Object Method", "Digital Ordinance Model", "None"],
+  answer: "Document Object Model" }];
+
+
+
+let currentQuestion = 0;
+let score = 0;
+let timeLeft = 15;
+let timer;
+
+function loadQuestion() {
+  const q = questions[currentQuestion];
+  document.getElementById("question").innerText = q.question;
+  const optionsDiv = document.getElementById("options");
+  optionsDiv.innerHTML = "";
+
+  q.options.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.innerText = opt;
+    btn.onclick = () => checkAnswer(btn, opt);
+    optionsDiv.appendChild(btn);
+  });
+
+  document.getElementById("progress").innerText = `Question ${currentQuestion + 1} of ${questions.length}`;
+  document.getElementById("nextBtn").disabled = true;
+  resetTimer();
+}
+
+function checkAnswer(button, selected) {
+  const correct = questions[currentQuestion].answer;
+  const buttons = document.querySelectorAll("#options button");
+
+  buttons.forEach(btn => {
+    btn.disabled = true;
+    if (btn.innerText === correct) btn.classList.add("correct");else
+    if (btn.innerText === selected) btn.classList.add("wrong");
+  });
+
+  if (selected === correct) {
+    score++;
+    document.getElementById("correctSound").play();
+  } else {
+    document.getElementById("wrongSound").play();
+  }
+
+  document.getElementById("nextBtn").disabled = false;
+  clearInterval(timer);
+}
+
+function nextQuestion() {
+  currentQuestion++;
+  if (currentQuestion < questions.length) {
+    loadQuestion();
+  } else {
+    showFinalResults();
+  }
+}
+
+function showFinalResults() {
+  document.getElementById("score").innerText = `Your Score: ${score} / ${questions.length}`;
+  const feedback = document.getElementById("feedback");
+  const flower = document.getElementById("flower-blast");
+  const party = document.getElementById("party-pop");
+  const sad = document.getElementById("sad-face");
+
+  if (score > 3) {
+    feedback.innerText = "Great job!";
+    flower.style.display = "block";
+    party.style.display = "block";
+    const yay = document.getElementById("yaySound");
+    yay.currentTime = 0;
+    yay.play();
+  } else if (score < 3) {
+    feedback.innerText = "Keep practicing!";
+    sad.style.display = "block";
+    const aww = document.getElementById("awwSound");
+    aww.currentTime = 0;
+    aww.play();
+  } else {
+    feedback.innerText = "Nice try!";
+    const nice = document.getElementById("niceTrySound");
+    nice.currentTime = 0;
+    nice.play();
+  }
+
+  document.getElementById("restartBtn").style.display = "inline-block";
+}
+
+function restartQuiz() {
+  currentQuestion = 0;
+  score = 0;
+  document.getElementById("score").innerText = "";
+  document.getElementById("feedback").innerText = "";
+  document.getElementById("flower-blast").style.display = "none";
+  document.getElementById("party-pop").style.display = "none";
+  document.getElementById("sad-face").style.display = "none";
+  document.getElementById("restartBtn").style.display = "none";
+  loadQuestion();
+}
+
+function resetTimer() {
+  timeLeft = 15;
+  document.getElementById("time").innerText = timeLeft;
+  clearInterval(timer);
+  timer = setInterval(() => {
+    timeLeft--;
+    document.getElementById("time").innerText = timeLeft;
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      checkAnswer(null, ""); // timeout = no selection
+    }
+  }, 1000);
+}
+
+window.onload = loadQuestion;
